@@ -6,14 +6,14 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 	},
 	"runArgs": [
-		// x11, direct rendering infrastructure
-		"-v", "/tmp/.X11-unix:/tmp/.X11-unix:ro"
+		// X11 setup
+		//"--device=/dev/kvm",
+		"-e",
+		// TODO: change the IP address by the host IP Address, or use: ${localEnv:DISPLAY}
+		"DISPLAY=192.168.2.64:0.0",
+		"-v",
+		"/tmp/.X11-unix:/tmp/.X11-unix"
 	],
-	"containerEnv": {
-		// TODO: change the IP address by the host IP Address
-		"DISPLAY": "192.168.2.64:0.0"
-	  },
-	
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"dart-code.dart-code",

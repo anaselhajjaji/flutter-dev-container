@@ -35,7 +35,7 @@ RUN apt-get update \
 		&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 		sudo \
         openjdk-8-jdk-headless \
-	    wget curl git xz-utils zip unzip libglu1 \
+	    wget curl git xz-utils zip unzip libglu1 gnupg \
         libpulse-dev libxcomposite-dev libxcursor-dev libasound2-dev kmod qemu-kvm \
         ssh vim locate \
 	# Clean Up
@@ -50,6 +50,14 @@ RUN apt-get update \
 	&& chmod 0440 /etc/sudoers.d/$USERNAME \
 	&& groupadd -g $KVM_GID kvm \
     && adduser $USERNAME kvm
+
+# Install
+# Chrome
+# Set the Chrome repo.
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+# Install Chrome.
+RUN apt-get update && apt-get -y install google-chrome-stable
 
 # Install
 # Android SDK	
