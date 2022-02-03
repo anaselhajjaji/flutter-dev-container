@@ -1,7 +1,4 @@
-FROM ubuntu:focal
-
-# Set the locale
-ENV LANG C.UTF-8
+FROM ubuntu:20.04
 
 # Android SDK Environment variables
 # See: https://developer.android.com/studio#downloads
@@ -16,8 +13,6 @@ ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platfo
 # https://flutter.dev/docs/development/tools/sdk/releases?tab=linux
 ENV FLUTTER_CHANNEL="stable"
 ENV FLUTTER_VERSION="2.10.0"
-# Set this variable as "enable" to auto config flutter web-server.
-ENV FLUTTER_WEB="enable"
 ENV FLUTTER_HOME=/opt/flutter
 ENV PATH=${PATH}:${FLUTTER_HOME}/bin
 
@@ -29,11 +24,20 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
+# The container is configured for non-root user but we need to access "/dev/kvm" to run emulators.
+# We have to map the group owner of "/dev/kvm` from host (which is "kvm") to inside the container.
+# So we'll create a new "kvm" group with the id from host returned in "cat /etc/group | grep kvm"). 
+ARG KVM_GID=108
+
 # Install needed packages, setup user and clean up.
 RUN apt-get update \
-	&& apt-get install -y sudo \
-	&& apt-get install -y openjdk-8-jdk-headless --no-install-recommends \
-	&& apt-get install -y wget curl git xz-utils zip unzip --no-install-recommends \
+	&& apt-get update \
+		&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+		sudo \
+        openjdk-8-jdk-headless \
+	    wget curl git xz-utils zip unzip libglu1 \
+        libpulse-dev libxcomposite-dev libxcursor-dev libasound2-dev kmod qemu-kvm \
+        ssh vim locate \
 	# Clean Up
 	&& apt-get autoremove -y \
 	&& apt-get clean -y \
@@ -43,7 +47,9 @@ RUN apt-get update \
 	&& groupadd --gid $USER_GID $USERNAME \
 	&& useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
 	&& echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-	&& chmod 0440 /etc/sudoers.d/$USERNAME
+	&& chmod 0440 /etc/sudoers.d/$USERNAME \
+	&& groupadd -g $KVM_GID kvm \
+    && adduser $USERNAME kvm
 
 # Install
 # Android SDK	
@@ -57,7 +63,8 @@ RUN cd /opt \
 	&& touch $HOME/.android/repositories.cfg \
 	&& sdkmanager platform-tools \
 	&& sdkmanager emulator \
-	&& sdkmanager "platforms;android-$ANDROID_PLATFORM_VERSION" "build-tools;$ANDROID_BUILD_TOOLS_VERSION"
+	&& sdkmanager "platforms;android-$ANDROID_PLATFORM_VERSION" "build-tools;$ANDROID_BUILD_TOOLS_VERSION" \
+	&& sdkmanager "system-images;android-27;google_apis_playstore;x86"
 
 # Install
 # Flutter SDK
@@ -67,5 +74,6 @@ RUN cd /opt \
 	&& rm flutter.tar.xz \
 	&& yes | flutter doctor --android-licenses \
 	&& flutter config --no-analytics \
-	&& if [ "$FLUTTER_WEB" = "enable" ]; then flutter config --enable-web; fi \
-	&& flutter update-packages
+	&& flutter config --enable-web \
+	&& flutter update-packages \
+	&& flutter emulators --create --name android-emulator

@@ -5,6 +5,15 @@
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash",
 	},
+	"runArgs": [
+		// x11, direct rendering infrastructure
+		"-v", "/tmp/.X11-unix:/tmp/.X11-unix:ro"
+	],
+	"containerEnv": {
+		// TODO: change the IP address by the host IP Address
+		"DISPLAY": "192.168.2.64:0.0"
+	  },
+	
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"dart-code.dart-code",
