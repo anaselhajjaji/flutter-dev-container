@@ -51,6 +51,12 @@ RUN apt-get update \
     && adduser $USERNAME kvm
 
 # Install
+# Requirements for Linux desktop support
+RUN apt-get update \
+		&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+		clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+# Install
 # Chrome
 # Set the Chrome repo.
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
@@ -84,5 +90,6 @@ RUN cd /opt \
 	&& yes | flutter doctor --android-licenses \
 	&& flutter config --no-analytics \
 	&& flutter config --enable-web \
+	&& flutter config --enable-linux-desktop \
 	&& flutter update-packages \
 	&& flutter emulators --create --name android-emulator
