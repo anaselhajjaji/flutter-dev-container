@@ -1,5 +1,8 @@
 FROM ubuntu:20.04
 
+# Linux GUI Setup
+ENV LD_LIBRARY_PATH=/usr/lib/wsl/lib
+
 # Android SDK Environment variables
 # See: https://developer.android.com/studio#downloads
 ENV ANDROID_SDK_TOOLS_VERSION 8092744
