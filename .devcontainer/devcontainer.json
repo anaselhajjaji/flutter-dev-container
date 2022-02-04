@@ -1,0 +1,28 @@
+{
+	"name": "Flutter",
+	"dockerFile": "Dockerfile",
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash",
+	},
+	"runArgs": [
+		// X11 setup
+		//"--device=/dev/kvm",
+		"-e",
+		// TODO: change the IP address by the host IP Address, or use: ${localEnv:DISPLAY}
+		"DISPLAY=192.168.2.64:0.0",
+		"-v",
+		"/tmp/.X11-unix:/tmp/.X11-unix"
+	],
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"dart-code.dart-code",
+		"dart-code.flutter"
+	],
+	// This command create an example project after the container is created.
+	"postCreateCommand": "flutter create test_project",
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	//"forwardPorts": [],
+	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+	// "remoteUser": "vscode"
+}
